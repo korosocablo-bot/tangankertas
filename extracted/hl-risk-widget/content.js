@@ -1,4 +1,4 @@
-// HL Risk Calculator v1.4 — 4 slots (2 long, 2 short) + autosave + autofill
+// HL Risk Calculator v1.5 — 4 slots (2 long, 2 short) + autosave + autofill
 // Autofill di-hardening: polling waitFor (bukan delay tetap), finder elemen
 // berbasis skor multi-strategi, setter nilai dengan verifikasi + fallback ketik,
 // dan konfigurasi selektor terpusat (HL_SELECTORS) agar tahan perubahan DOM.
@@ -7,6 +7,9 @@
 // v1.4 fix: finder memindai SEMUA elemen (tab Buy/Sell bisa <div>/<span>,
 // bukan <button>) & klik elemen terdalam (bubbling), clickEl pakai pointer
 // events, + window.__hlRiskDiag() untuk diagnosa DOM dari Console.
+// v1.5: fitur Risk-Reward (default 1:3, ganti tombol 5/10/20/50) + harga Take
+// Profit otomatis per slot & autofill TP; opsi ukuran fill FULL/50% per slot;
+// font diperbesar (panel 540px).
 (function () {
   if (document.getElementById('hl-risk-widget')) return;
 
@@ -16,13 +19,18 @@
   let autofillBusy = false; // guard agar autofill tidak jalan ganda
   let state = {
     risk: 10,
+    rr: 3,                 // default Risk-Reward 1:3
     slots: {
-      buy1:  { price: '', sl: '' },
-      buy2:  { price: '', sl: '' },
-      sell1: { price: '', sl: '' },
-      sell2: { price: '', sl: '' },
+      buy1:  { price: '', sl: '', pct: 100 },
+      buy2:  { price: '', sl: '', pct: 100 },
+      sell1: { price: '', sl: '', pct: 100 },
+      sell2: { price: '', sl: '', pct: 100 },
     }
   };
+
+  // Default aman untuk state lama yang tersimpan (tanpa rr / pct).
+  function getRR()    { const v = parseFloat(state.rr); return (v && v > 0) ? v : 3; }
+  function getPct(id) { const p = state.slots[id] && parseFloat(state.slots[id].pct); return (p === 50) ? 50 : 100; }
 
   // ── STORAGE ──
   function loadState(cb) {
@@ -60,11 +68,12 @@
 
   // ── HTML BUILDER ──
   function slotHTML(id) {
-    const s = state.slots[id] || { price: '', sl: '' };
+    const s = state.slots[id] || { price: '', sl: '', pct: 100 };
     const isBuy  = slotSide(id) === 'buy';
     const colCls = isBuy ? 'hl-col-buy' : 'hl-col-sell';
     const arrow  = isBuy ? '▲' : '▼';
     const fillLabel = isBuy ? `▲ FILL ${slotLabel(id)}` : `▼ FILL ${slotLabel(id)}`;
+    const pct = getPct(id);
 
     return `
       <div class="hl-col ${colCls}" data-slot="${id}">
@@ -94,6 +103,19 @@
           </div>
         </div>
 
+        <div class="hl-tp-result">
+          <div class="hl-size-label">Take Profit <span class="hl-tp-rr" id="${id}-rrlbl">1:${getRR()}</span></div>
+          <div class="hl-input-wrap">
+            <span class="hl-tp-value" id="${id}-tp">—</span>
+            <button class="hl-copy-btn" data-copy="${id}-tp">copy</button>
+          </div>
+        </div>
+
+        <div class="hl-pct-toggle">
+          <button class="hl-pctbtn ${pct === 100 ? 'active' : ''}" data-slot="${id}" data-pct="100">FULL</button>
+          <button class="hl-pctbtn ${pct === 50  ? 'active' : ''}" data-slot="${id}" data-pct="50">50%</button>
+        </div>
+
         <button class="hl-autofill-btn ${colCls}-fill" id="btn-autofill-${id}">
           ${fillLabel}
         </button>
@@ -117,15 +139,17 @@
 
         <div id="hl-widget-body">
 
-          <!-- RISK -->
+          <!-- RISK + RR -->
           <div id="hl-risk-row">
             <label>RISK $</label>
             <input type="number" id="hl-risk-input" value="${state.risk}" min="0.1" step="0.5" />
-            <div class="hl-risk-quick">
-              <button class="hl-qbtn" data-risk="5">5</button>
-              <button class="hl-qbtn" data-risk="10">10</button>
-              <button class="hl-qbtn" data-risk="20">20</button>
-              <button class="hl-qbtn" data-risk="50">50</button>
+            <label class="hl-rr-label">RR 1:</label>
+            <input type="number" id="hl-rr-input" value="${getRR()}" min="0.5" step="0.5" />
+            <div class="hl-rr-quick">
+              <button class="hl-rrbtn" data-rr="1">1</button>
+              <button class="hl-rrbtn" data-rr="2">2</button>
+              <button class="hl-rrbtn" data-rr="3">3</button>
+              <button class="hl-rrbtn" data-rr="5">5</button>
             </div>
           </div>
 
@@ -174,6 +198,15 @@
     return risk / (Math.abs(e - s) / e);
   }
 
+  // Take Profit dari Risk-Reward: TP = entry ± RR × |entry − SL|.
+  // Long (buy): TP di atas entry. Short (sell): TP di bawah entry.
+  function calcTP(side, entry, sl, rr) {
+    const e = cleanNum(entry), s = cleanNum(sl);
+    if (!e || !s || isNaN(e) || isNaN(s) || e === s || !rr) return null;
+    const riskPerUnit = Math.abs(e - s);
+    return side === 'buy' ? e + rr * riskPerUnit : e - rr * riskPerUnit;
+  }
+
   function formatSize(val) {
     if (val === null || isNaN(val) || !isFinite(val)) return '—';
     if (val >= 10000) return val.toFixed(0);
@@ -181,13 +214,29 @@
     return val.toFixed(2);
   }
 
+  // Format harga adaptif sesuai besaran (BTC vs koin desimal kecil).
+  function formatPrice(val) {
+    if (val === null || isNaN(val) || !isFinite(val)) return '—';
+    const a = Math.abs(val);
+    if (a >= 1000) return val.toFixed(1);
+    if (a >= 1)    return val.toFixed(2);
+    if (a >= 0.01) return val.toFixed(4);
+    return val.toFixed(6);
+  }
+
   function updateAllCalc() {
     const risk = parseFloat(document.getElementById('hl-risk-input')?.value) || 0;
+    const rr   = getRR();
     SLOTS.forEach(id => {
-      const sl = state.slots[id];
+      const sl   = state.slots[id];
       const size = calcSize(risk, sl.price, sl.sl);
-      const el = document.getElementById(`${id}-size`);
-      if (el) el.textContent = formatSize(size);
+      const tp   = calcTP(slotSide(id), sl.price, sl.sl, rr);
+      const sizeEl = document.getElementById(`${id}-size`);
+      const tpEl   = document.getElementById(`${id}-tp`);
+      const rrLbl  = document.getElementById(`${id}-rrlbl`);
+      if (sizeEl) sizeEl.textContent = formatSize(size);
+      if (tpEl)   tpEl.textContent   = formatPrice(tp);
+      if (rrLbl)  rrLbl.textContent  = `1:${rr}`;
     });
   }
 
@@ -229,8 +278,10 @@
     sizeHints:  ['size', 'amount', 'quantity', 'qty', 'jumlah', 'ukuran'],
     // Teks toggle/checkbox untuk mengaktifkan TP/SL.
     tpslHints:  ['tp/sl', 'tp / sl', 'tpsl', 'take profit / stop loss', 'stop loss', 'take profit'],
+    // Kata kunci untuk field Take Profit (hindari ketabrak dengan SL).
+    tpHints:    ['tp price', 'take profit', 'tp trigger', 'profit', 'gain', 'tp'],
     // Kata kunci untuk field Stop Loss (hindari ketabrak dengan TP).
-    slHints:    ['stop loss', 'sl price', 'sl trigger', 'stop price', 'trigger', 'stop', 'loss', 'sl'],
+    slHints:    ['sl price', 'stop loss', 'sl trigger', 'stop price', 'loss', 'stop', 'sl'],
   };
 
   // Batas waktu & interval polling default (ms).
@@ -528,15 +579,19 @@
     const side  = slotSide(slotId);
     const price = cleanNum(slot.price);
     const sl    = cleanNum(slot.sl);
+    const rr    = getRR();
+    const pct   = getPct(slotId);
     const risk  = parseFloat(document.getElementById('hl-risk-input').value) || 0;
-    const size  = calcSize(risk, price, sl);
+    const fullSize = calcSize(risk, price, sl);
+    const size  = (fullSize != null) ? fullSize * (pct / 100) : null;
+    const tp    = calcTP(side, price, sl, rr);
 
     if (!price || !sl || !size || isNaN(size)) {
       setStatus(`⚠ ${slotLabel(slotId)}: Isi Entry Price & SL dulu`, 'err'); return;
     }
 
     autofillBusy = true;
-    setStatus(`⏳ Mengisi ${slotLabel(slotId)}...`, 'warn');
+    setStatus(`⏳ Mengisi ${slotLabel(slotId)} (${pct}%)...`, 'warn');
     const done = []; // langkah yang berhasil, untuk laporan status
 
     try {
@@ -567,12 +622,12 @@
       if (await setValue(priceInput, roundToInt(price))) done.push('price');
       await sleep(120);
 
-      // 4. Field Size (hindari memakai ulang input Price)
+      // 4. Field Size — pakai fraksi terpilih (FULL / 50%)
       const sizeInput = await waitFor(() =>
         findInput(HL_SELECTORS.sizeHints, { root, avoid: [priceInput] }) ||
         findInput(HL_SELECTORS.sizeHints, { avoid: [priceInput] }), { timeout: 3000 });
       if (sizeInput) {
-        if (await setValue(sizeInput, Math.round(size))) done.push('size');
+        if (await setValue(sizeInput, Math.round(size))) done.push(`size${pct}%`);
       } else {
         setStatus('⚠ field Size tidak ditemukan — lanjut', 'warn');
       }
@@ -583,8 +638,23 @@
                    findToggle(HL_SELECTORS.tpslHints);
       if (tpsl && !isToggleOn(tpsl)) { clickEl(tpsl); await sleep(350); }
 
-      // 6. Field Stop Loss (muncul setelah TP/SL aktif; hindari input Price & Size)
-      const used = [priceInput, sizeInput].filter(Boolean);
+      // 6. Field Take Profit (dari RR) — hindari input Price & Size
+      let tpInput = null;
+      if (tp != null && isFinite(tp) && tp > 0) {
+        const avoidTP = [priceInput, sizeInput].filter(Boolean);
+        tpInput = await waitFor(() =>
+          findInput(HL_SELECTORS.tpHints, { root, avoid: avoidTP }) ||
+          findInput(HL_SELECTORS.tpHints, { avoid: avoidTP }), { timeout: 3000 });
+        if (tpInput) {
+          if (await setValue(tpInput, roundToInt(tp))) done.push('tp');
+        } else {
+          setStatus('⚠ field Take Profit tidak ditemukan — lanjut', 'warn');
+        }
+        await sleep(120);
+      }
+
+      // 7. Field Stop Loss (hindari Price, Size, dan TP)
+      const used = [priceInput, sizeInput, tpInput].filter(Boolean);
       const slInput = await waitFor(() =>
         findInput(HL_SELECTORS.slHints, { root, avoid: used }) ||
         findInput(HL_SELECTORS.slHints, { avoid: used }), { timeout: 3000 });
@@ -596,8 +666,9 @@
 
       // Laporan akhir: tampilkan langkah yang berhasil.
       if (done.includes('price')) {
+        const tpTxt = (tp != null) ? ` TP=${roundToInt(tp)}` : '';
         setStatus(
-          `✓ ${slotLabel(slotId)} [${done.join(', ')}] · Price=${roundToInt(price)} Size=${Math.round(size)} SL=${roundToInt(sl)}`,
+          `✓ ${slotLabel(slotId)} ${pct}% [${done.join(', ')}] · P=${roundToInt(price)} Sz=${Math.round(size)}${tpTxt} SL=${roundToInt(sl)}`,
           'ok'
         );
       } else {
@@ -647,25 +718,48 @@
       updateAllCalc(); saveState();
     });
 
-    // Quick risk
-    wrapper.querySelectorAll('.hl-qbtn').forEach(btn => {
+    // RR (Risk-Reward) input
+    document.getElementById('hl-rr-input').addEventListener('input', (e) => {
+      state.rr = parseFloat(e.target.value) || 0;
+      updateAllCalc(); saveState();
+    });
+
+    // Quick RR presets (mengganti tombol 5/10/20/50 lama)
+    wrapper.querySelectorAll('.hl-rrbtn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const val = btn.getAttribute('data-risk');
-        document.getElementById('hl-risk-input').value = val;
-        state.risk = parseFloat(val);
+        const val = btn.getAttribute('data-rr');
+        document.getElementById('hl-rr-input').value = val;
+        state.rr = parseFloat(val);
         updateAllCalc(); saveState();
       });
     });
 
-    // Copy buttons
+    // Toggle ukuran fill: FULL (100%) / 50%
+    wrapper.querySelectorAll('.hl-pctbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id  = btn.getAttribute('data-slot');
+        const pct = parseFloat(btn.getAttribute('data-pct'));
+        if (!state.slots[id]) return;
+        state.slots[id].pct = pct;
+        // perbarui status aktif kedua tombol di slot ini
+        wrapper.querySelectorAll(`.hl-pctbtn[data-slot="${id}"]`).forEach(b => {
+          b.classList.toggle('active', parseFloat(b.getAttribute('data-pct')) === pct);
+        });
+        saveState();
+      });
+    });
+
+    // Copy buttons (mendukung input maupun span seperti TP)
     wrapper.querySelectorAll('.hl-copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-copy');
-        const input = document.getElementById(targetId);
-        if (!input) return;
-        const n = cleanNum(input.value);
+        const el = document.getElementById(targetId);
+        if (!el) return;
+        const raw = ('value' in el && el.value !== undefined && el.tagName === 'INPUT')
+          ? el.value : el.textContent;
+        const n = cleanNum(raw);
         const isSL = targetId.includes('-sl');
-        const copyVal = isNaN(n) ? input.value : (isSL ? String(roundToInt(n)) : String(n));
+        const copyVal = isNaN(n) ? String(raw).trim() : (isSL ? String(roundToInt(n)) : String(n));
         doCopy(copyVal, btn);
       });
     });
@@ -703,7 +797,7 @@
     document.addEventListener('mousemove', (e) => {
       if (!dragging) return;
       wrapper.style.right = 'auto'; wrapper.style.bottom = 'auto';
-      wrapper.style.left = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - 400)) + 'px';
+      wrapper.style.left = Math.max(0, Math.min(e.clientX - ox, window.innerWidth  - 480)) + 'px';
       wrapper.style.top  = Math.max(0, Math.min(e.clientY - oy, window.innerHeight -  60)) + 'px';
     });
     document.addEventListener('mouseup', () => { dragging = false; panel.classList.remove('dragging'); });

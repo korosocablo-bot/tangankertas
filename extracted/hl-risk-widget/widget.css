@@ -1,4 +1,4 @@
-/* HL Risk Calculator v1.2 */
+/* HL Risk Calculator v1.5 */
 #hl-risk-widget {
   position: fixed;
   bottom: 20px;
@@ -11,7 +11,7 @@
 #hl-risk-widget * { box-sizing: border-box; margin: 0; padding: 0; }
 
 #hl-widget-panel {
-  width: 480px;
+  width: 540px;
   background: #111214;
   border: 1px solid #2e3035;
   border-radius: 7px;
@@ -31,7 +31,7 @@
 }
 
 #hl-widget-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 2.5px;
   text-transform: uppercase;
@@ -44,9 +44,9 @@
 #hl-widget-controls { display: flex; gap: 6px; align-items: center; }
 
 .hl-ctrl-btn {
-  width: 18px; height: 18px;
+  width: 22px; height: 22px;
   border-radius: 50%; border: none; cursor: pointer;
-  font-size: 10px; display: flex; align-items: center;
+  font-size: 12px; display: flex; align-items: center;
   justify-content: center; transition: opacity 0.15s; line-height: 1;
 }
 .hl-ctrl-btn:hover { opacity: 0.65; }
@@ -75,30 +75,34 @@
 }
 
 #hl-risk-row label {
-  font-size: 10px; color: #aaa;
+  font-size: 12px; color: #aaa;
   letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
 }
+.hl-rr-label { color: #6fb3ff !important; }
 
-#hl-risk-input {
-  flex: 1; background: #1c1e22;
+#hl-risk-input, #hl-rr-input {
+  flex: 1; min-width: 56px; background: #1c1e22;
   border: 1px solid #333840; border-radius: 4px;
-  color: #f0c040; font-family: 'Courier New', monospace;
-  font-size: 17px; font-weight: 700; padding: 6px 10px;
-  text-align: center; outline: none; width: 90px;
+  font-family: 'Courier New', monospace;
+  font-size: 19px; font-weight: 700; padding: 7px 8px;
+  text-align: center; outline: none;
   transition: border-color 0.15s;
 }
+#hl-risk-input { color: #f0c040; }
+#hl-rr-input   { color: #6fb3ff; }
 #hl-risk-input:focus { border-color: #f0c040; }
+#hl-rr-input:focus   { border-color: #6fb3ff; }
 
-.hl-risk-quick { display: flex; gap: 4px; }
+.hl-rr-quick { display: flex; gap: 4px; }
 
-.hl-qbtn {
+.hl-rrbtn {
   background: #1c1e22; border: 1px solid #2e3035;
   color: #ccc; font-family: 'Courier New', monospace;
-  font-size: 11px; font-weight: 600;
-  padding: 5px 9px; border-radius: 3px; cursor: pointer;
+  font-size: 13px; font-weight: 700;
+  padding: 6px 10px; border-radius: 3px; cursor: pointer;
   transition: all 0.12s;
 }
-.hl-qbtn:hover { background: #252830; color: #f0c040; border-color: #f0c040; }
+.hl-rrbtn:hover { background: #252830; color: #6fb3ff; border-color: #6fb3ff; }
 
 /* SECTION LABELS */
 #hl-section-headers {
@@ -110,11 +114,11 @@
 
 .hl-section-label {
   text-align: center;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  padding: 3px 0;
+  padding: 4px 0;
   border-radius: 3px;
 }
 .buy-label  { color: #4cd97e; background: #0c1810; border: 1px solid #1a3a22; }
@@ -144,7 +148,7 @@
 .hl-col-sell { background: #180c0c; border-color: #401e1e; }
 
 .hl-col-title {
-  font-size: 9px; font-weight: 700;
+  font-size: 11px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase;
   margin-bottom: 8px; text-align: center;
 }
@@ -154,7 +158,7 @@
 .hl-field { margin-bottom: 7px; }
 
 .hl-field label {
-  display: block; font-size: 8px; color: #888;
+  display: block; font-size: 10px; color: #999;
   letter-spacing: 1px; text-transform: uppercase;
   margin-bottom: 3px; font-weight: 600;
 }
@@ -165,8 +169,8 @@
   flex: 1; background: #16181c;
   border: 1px solid #2a2e35; border-radius: 3px;
   color: #f2f2f2; font-family: 'Courier New', monospace;
-  font-size: 13px; font-weight: 600;
-  padding: 4px 6px; outline: none;
+  font-size: 16px; font-weight: 600;
+  padding: 6px 7px; outline: none;
   transition: border-color 0.12s; min-width: 0;
 }
 .hl-col-buy  .hl-field input[type="text"]:focus { border-color: #4cd97e; }
@@ -175,7 +179,7 @@
 .hl-copy-btn {
   background: #1e2228; border: 1px solid #2e3540;
   color: #bbb; font-family: 'Courier New', monospace;
-  font-size: 8px; padding: 4px 5px;
+  font-size: 10px; padding: 5px 7px;
   border-radius: 3px; cursor: pointer;
   white-space: nowrap; transition: all 0.12s; font-weight: 600;
 }
@@ -184,31 +188,61 @@
 
 /* SIZE RESULT */
 .hl-size-result {
-  padding: 6px 7px; border-radius: 3px;
-  text-align: center; margin-bottom: 0;
+  padding: 7px 8px; border-radius: 3px;
+  text-align: center; margin-bottom: 6px;
 }
 .hl-col-buy  .hl-size-result { background: #0d2016; border: 1px solid #1a3a22; }
 .hl-col-sell .hl-size-result { background: #200d0d; border: 1px solid #3a1a1a; }
 
 .hl-size-label {
-  font-size: 7px; color: #777;
+  font-size: 9px; color: #888;
   letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 1px; font-weight: 600;
+  margin-bottom: 2px; font-weight: 600;
 }
-.hl-size-value { font-size: 15px; font-weight: 700; }
+.hl-size-value { font-size: 19px; font-weight: 700; }
 .hl-col-buy  .hl-size-value { color: #4cd97e; }
 .hl-col-sell .hl-size-value { color: #f06060; }
-.hl-size-unit { font-size: 8px; color: #666; margin-left: 2px; }
+.hl-size-unit { font-size: 10px; color: #666; margin-left: 2px; }
+
+/* TAKE PROFIT RESULT (dari RR) */
+.hl-tp-result {
+  padding: 7px 8px; border-radius: 3px;
+  text-align: center; margin-bottom: 7px;
+  background: #0c1622; border: 1px solid #1c3350;
+}
+.hl-tp-result .hl-input-wrap { justify-content: center; }
+.hl-tp-value { font-size: 17px; font-weight: 700; color: #6fb3ff; }
+.hl-tp-rr {
+  color: #6fb3ff; background: #14233a;
+  border: 1px solid #1c3350; border-radius: 3px;
+  padding: 1px 5px; font-size: 9px; margin-left: 3px;
+}
+
+/* TOGGLE UKURAN FILL: FULL / 50% */
+.hl-pct-toggle {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px; margin-bottom: 6px;
+}
+.hl-pctbtn {
+  background: #1c1e22; border: 1px solid #2e3035;
+  color: #999; font-family: 'Courier New', monospace;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  padding: 6px 0; border-radius: 3px; cursor: pointer;
+  text-transform: uppercase; transition: all 0.12s;
+}
+.hl-pctbtn:hover { color: #fff; border-color: #555; }
+.hl-col-buy  .hl-pctbtn.active { background: #16351f; color: #7fffa8; border-color: #30804a; }
+.hl-col-sell .hl-pctbtn.active { background: #351616; color: #ffaaaa; border-color: #803030; }
 
 /* AUTOFILL BUTTONS */
 .hl-autofill-btn {
   width: 100%;
-  margin-top: 8px;
-  padding: 10px 0;
+  margin-top: 4px;
+  padding: 12px 0;
   border-radius: 4px;
   border: none;
   font-family: 'Courier New', monospace;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -251,14 +285,14 @@
 /* STATUS BAR */
 #hl-status-bar {
   margin-top: 10px;
-  padding: 6px 10px;
+  padding: 8px 10px;
   background: #16181c;
   border-radius: 3px;
-  font-size: 9px;
-  color: #666;
+  font-size: 11px;
+  color: #888;
   text-align: center;
   letter-spacing: 0.5px;
-  min-height: 26px;
+  min-height: 30px;
   border: 1px solid #222428;
   transition: color 0.2s;
   display: flex;
