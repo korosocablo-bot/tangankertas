@@ -1,13 +1,17 @@
-// HL Risk Calculator v1.2 — 4 slots (2 long, 2 short) + autosave + autofill
+// HL Risk Calculator v1.3 — 4 slots (2 long, 2 short) + autosave + autofill
 // Autofill di-hardening: polling waitFor (bukan delay tetap), finder elemen
 // berbasis skor multi-strategi, setter nilai dengan verifikasi + fallback ketik,
 // dan konfigurasi selektor terpusat (HL_SELECTORS) agar tahan perubahan DOM.
+// v1.3 fix: kecualikan subtree widget sendiri (#hl-risk-widget) dari semua
+// pencarian DOM + guard re-entrancy, agar tidak salah klik tombol/isi field
+// milik widget sendiri (penyebab error & rekursi di app.hyperliquid.xyz).
 (function () {
   if (document.getElementById('hl-risk-widget')) return;
 
   // ── STATE ──
   // slots: buy1, buy2, sell1, sell2
   const SLOTS = ['buy1','buy2','sell1','sell2'];
+  let autofillBusy = false; // guard agar autofill tidak jalan ganda
   let state = {
     risk: 10,
     slots: {
@@ -232,6 +236,15 @@
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+  // PENTING: jangan pernah menjaring elemen widget kita sendiri.
+  // Tombol "FILL LONG A" mengandung kata "long" dan input kita ber-id
+  // seperti "buy1-price"/"buy1-sl", sehingga tanpa filter ini script bisa
+  // salah mengklik tombolnya sendiri (rekursif) atau mengisi field sendiri.
+  function notInWidget(el) {
+    const w = document.getElementById('hl-risk-widget');
+    return !w || !w.contains(el);
+  }
+
   // Normalisasi teks: rapikan whitespace + lowercase.
   function norm(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toLowerCase(); }
 
@@ -265,10 +278,11 @@
   }
 
   // Kumpulan elemen yang bisa diklik (button, role=button/tab, link, dll).
+  // Elemen di dalam widget sendiri selalu dikecualikan.
   function clickables(root) {
     return Array.from((root || document).querySelectorAll(
-      'button, [role="button"], [role="tab"], a, [class*="cursor-pointer"], [class*="cursor"]'
-    ));
+      'button, [role="button"], [role="tab"], a, [class*="cursor-pointer"]'
+    )).filter(notInWidget);
   }
 
   // Cari elemen klik berdasarkan teks, diberi skor:
@@ -324,10 +338,11 @@
     return norm(parts.filter(Boolean).join(' '));
   }
 
-  // Semua input teks/angka yang terlihat.
+  // Semua input teks/angka yang terlihat (di luar widget sendiri).
   function textInputs(root) {
     return Array.from((root || document).querySelectorAll('input, textarea'))
       .filter(i => !['hidden', 'checkbox', 'radio', 'button', 'submit'].includes(i.type))
+      .filter(notInWidget)
       .filter(isVisible);
   }
 
@@ -357,7 +372,7 @@
     const wanted = hints.map(norm).filter(Boolean);
     const boxes = Array.from(root.querySelectorAll(
       'input[type="checkbox"], [role="checkbox"], [role="switch"]'
-    ));
+    )).filter(notInWidget);
     for (const cb of boxes) {
       const ctx = norm((cb.closest('label, div, tr')?.textContent || '') + ' ' +
                        (cb.getAttribute('aria-label') || ''));
@@ -436,6 +451,7 @@
   }
 
   async function autofillHL(slotId) {
+    if (autofillBusy) return;            // cegah klik ganda / re-entrancy
     const slot  = state.slots[slotId];
     const side  = slotSide(slotId);
     const price = cleanNum(slot.price);
@@ -447,6 +463,7 @@
       setStatus(`⚠ ${slotLabel(slotId)}: Isi Entry Price & SL dulu`, 'err'); return;
     }
 
+    autofillBusy = true;
     setStatus(`⏳ Mengisi ${slotLabel(slotId)}...`, 'warn');
     const done = []; // langkah yang berhasil, untuk laporan status
 
@@ -517,6 +534,8 @@
     } catch (err) {
       setStatus('⚠ Gagal autofill: ' + err.message, 'err');
       console.error('[HL Widget] autofill error:', err);
+    } finally {
+      autofillBusy = false;             // selalu lepas guard, sukses/gagal
     }
   }
 
