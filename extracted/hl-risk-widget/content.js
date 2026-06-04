@@ -1,10 +1,12 @@
-// HL Risk Calculator v1.3 — 4 slots (2 long, 2 short) + autosave + autofill
+// HL Risk Calculator v1.4 — 4 slots (2 long, 2 short) + autosave + autofill
 // Autofill di-hardening: polling waitFor (bukan delay tetap), finder elemen
 // berbasis skor multi-strategi, setter nilai dengan verifikasi + fallback ketik,
 // dan konfigurasi selektor terpusat (HL_SELECTORS) agar tahan perubahan DOM.
 // v1.3 fix: kecualikan subtree widget sendiri (#hl-risk-widget) dari semua
-// pencarian DOM + guard re-entrancy, agar tidak salah klik tombol/isi field
-// milik widget sendiri (penyebab error & rekursi di app.hyperliquid.xyz).
+// pencarian DOM + guard re-entrancy.
+// v1.4 fix: finder memindai SEMUA elemen (tab Buy/Sell bisa <div>/<span>,
+// bukan <button>) & klik elemen terdalam (bubbling), clickEl pakai pointer
+// events, + window.__hlRiskDiag() untuk diagnosa DOM dari Console.
 (function () {
   if (document.getElementById('hl-risk-widget')) return;
 
@@ -277,23 +279,49 @@
     return r.width > 0 && r.height > 0;
   }
 
-  // Kumpulan elemen yang bisa diklik (button, role=button/tab, link, dll).
-  // Elemen di dalam widget sendiri selalu dikecualikan.
-  function clickables(root) {
-    return Array.from((root || document).querySelectorAll(
-      'button, [role="button"], [role="tab"], a, [class*="cursor-pointer"]'
-    )).filter(notInWidget);
+  // Cari elemen yang teksnya cocok dengan salah satu `texts`.
+  // Memindai SEMUA elemen (bukan hanya <button>), karena tab Buy/Sell di
+  // Hyperliquid sering berupa <div>/<span> tanpa atribut tombol. Dipilih
+  // elemen TERKECIL (paling dalam) dengan skor tertinggi — meng-klik elemen
+  // ini tetap memicu handler induknya lewat event bubbling (React delegation).
+  //   exact (100) > whole-word (80) > substring (55).
+  function findClickableByText(texts, opts = {}) {
+    const root = (opts.root && opts.root.querySelectorAll) ? opts.root : document;
+    const exclude = opts.exclude || [];
+    const wanted = texts.map(norm).filter(Boolean);
+    let best = null, bestScore = 0, bestLen = Infinity;
+    for (const el of root.querySelectorAll('*')) {
+      if (exclude.includes(el) || !notInWidget(el)) continue;
+      const tag = el.tagName;
+      if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'SVG' || tag === 'PATH') continue;
+      const t = norm(el.textContent);
+      if (!t || t.length > 28) continue; // hindari kontainer besar
+      if (!isVisible(el)) continue;
+      const toks = tokens(t);
+      let score = 0;
+      for (const w of wanted) {
+        if (t === w) score = Math.max(score, 100);
+        else if (toks.includes(w)) score = Math.max(score, 80);
+        else if (t.includes(w)) score = Math.max(score, 55);
+      }
+      if (score <= 0) continue;
+      // skor lebih tinggi menang; jika seri, teks lebih pendek (lebih "dalam") menang.
+      if (score > bestScore || (score === bestScore && t.length < bestLen)) {
+        bestScore = score; best = el; bestLen = t.length;
+      }
+    }
+    return bestScore >= 55 ? best : null;
   }
 
-  // Cari elemen klik berdasarkan teks, diberi skor:
-  //   exact match (100) > whole-word (75) > substring (55, makin pendek makin tinggi).
-  // Mengembalikan kandidat dengan skor tertinggi di atas ambang.
-  function findClickableByText(texts, opts = {}) {
+  // (lama, tak dipakai lagi) — disimpan sebagai referensi internal.
+  function _legacyFindClickableByText(texts, opts = {}) {
     const root = opts.root || document;
     const exclude = opts.exclude || [];
     const wanted = texts.map(norm).filter(Boolean);
     let best = null, bestScore = 0;
-    for (const el of clickables(root)) {
+    const list = Array.from((root || document).querySelectorAll(
+      'button, [role="button"], [role="tab"], a, [class*="cursor-pointer"]')).filter(notInWidget);
+    for (const el of list) {
       if (exclude.includes(el) || !isVisible(el)) continue;
       const t = norm(el.textContent);
       if (!t || t.length > 40) continue; // hindari kontainer besar
@@ -386,11 +414,19 @@
     return cb.getAttribute('aria-checked') === 'true';
   }
 
-  // Klik yang meniru interaksi user (mousedown→mouseup→click).
+  // Klik yang meniru interaksi user selengkap mungkin:
+  // pointerdown → mousedown → pointerup → mouseup → click.
+  // Sebagian komponen React hanya bereaksi pada pointer events.
+  // Catatan: pakai SATU sumber 'click' saja (el.click() bila tersedia,
+  // selain itu dispatch manual) agar toggle tidak ter-klik dua kali.
   function clickEl(el) {
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    el.dispatchEvent(new MouseEvent('mouseup',   { bubbles: true }));
-    try { el.click(); } catch (_) {}
+    const opts = { bubbles: true, cancelable: true, view: window };
+    try { el.dispatchEvent(new PointerEvent('pointerdown', opts)); } catch (_) {}
+    el.dispatchEvent(new MouseEvent('mousedown', opts));
+    try { el.dispatchEvent(new PointerEvent('pointerup', opts)); } catch (_) {}
+    el.dispatchEvent(new MouseEvent('mouseup', opts));
+    if (typeof el.click === 'function') el.click();
+    else el.dispatchEvent(new MouseEvent('click', opts));
   }
 
   // Set value lewat setter prototype (React-friendly) + dispatch event.
@@ -450,6 +486,42 @@
     return document;
   }
 
+  // ── DIAGNOSTIK ──
+  // Jalankan window.__hlRiskDiag() di Console untuk melihat apa saja yang
+  // "terlihat" oleh script: kandidat tab Buy/Sell/Limit serta semua input.
+  // Kirim hasilnya ke pengembang untuk menyetel HL_SELECTORS bila perlu.
+  function hlDiag() {
+    const seen = new Set();
+    const clickCandidates = [];
+    for (const el of document.querySelectorAll('*')) {
+      if (!notInWidget(el)) continue;
+      const t = norm(el.textContent);
+      if (!t || t.length > 24) continue;
+      if (!/\b(buy|sell|long|short|limit|market|tp\/?sl|stop|profit)\b/.test(t)) continue;
+      if (!isVisible(el)) continue;
+      const key = el.tagName + '|' + t;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      clickCandidates.push({ tag: el.tagName, role: el.getAttribute('role') || '', text: t,
+                             cls: (el.className || '').toString().slice(0, 60) });
+    }
+    const inputs = textInputs().map(i => ({
+      ph: i.placeholder || '', aria: i.getAttribute('aria-label') || '',
+      name: i.name || '', id: i.id || '', ctx: inputContext(i).slice(0, 80),
+    }));
+    const toggles = Array.from(document.querySelectorAll(
+      'input[type="checkbox"], [role="checkbox"], [role="switch"]'))
+      .filter(notInWidget)
+      .map(cb => ({ text: norm(cb.closest('label, div, tr')?.textContent || '').slice(0, 60),
+                    aria: cb.getAttribute('aria-label') || '' }));
+    console.log('%c[HL Risk] ── DIAGNOSTIK ──', 'color:#26d0ce;font-weight:bold');
+    console.log('[HL Risk] Kandidat tab/teks (buy/sell/limit/dll):', clickCandidates);
+    console.log('[HL Risk] Input terlihat:', inputs);
+    console.log('[HL Risk] Toggle/checkbox:', toggles);
+    return { clickCandidates, inputs, toggles };
+  }
+  try { window.__hlRiskDiag = hlDiag; } catch (_) {}
+
   async function autofillHL(slotId) {
     if (autofillBusy) return;            // cegah klik ganda / re-entrancy
     const slot  = state.slots[slotId];
@@ -479,7 +551,8 @@
       if (sideTab) {
         clickEl(sideTab); done.push('side'); await sleep(250);
       } else {
-        setStatus(`⚠ Tab ${side === 'buy' ? 'Buy/Long' : 'Sell/Short'} tak ditemukan — lanjut`, 'warn');
+        hlDiag(); // dump kandidat ke Console untuk diagnosa
+        setStatus(`⚠ Tab ${side === 'buy' ? 'Buy/Long' : 'Sell/Short'} tak ditemukan — buka Console, jalankan __hlRiskDiag()`, 'warn');
       }
 
       // 2. Tab Limit
