@@ -1,0 +1,298 @@
+/* HL Risk Calculator v1.5 */
+#hl-risk-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2147483647;
+  font-family: 'Courier New', Courier, monospace;
+  user-select: none;
+}
+
+#hl-risk-widget * { box-sizing: border-box; margin: 0; padding: 0; }
+
+#hl-widget-panel {
+  width: 540px;
+  background: #111214;
+  border: 1px solid #2e3035;
+  border-radius: 7px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+
+/* HEADER */
+#hl-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 13px;
+  background: #16181c;
+  border-bottom: 1px solid #222428;
+  cursor: move;
+}
+
+#hl-widget-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #f0c040;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#hl-widget-controls { display: flex; gap: 6px; align-items: center; }
+
+.hl-ctrl-btn {
+  width: 22px; height: 22px;
+  border-radius: 50%; border: none; cursor: pointer;
+  font-size: 12px; display: flex; align-items: center;
+  justify-content: center; transition: opacity 0.15s; line-height: 1;
+}
+.hl-ctrl-btn:hover { opacity: 0.65; }
+#hl-btn-minimize { background: #f0c040; color: #000; }
+#hl-btn-close    { background: #e05555; color: #fff; }
+
+#hl-save-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%; background: #4cd97e;
+  display: inline-block; opacity: 0;
+  transition: opacity 0.3s;
+}
+#hl-save-dot.active { opacity: 1; }
+
+/* BODY */
+#hl-widget-body { padding: 11px; }
+
+/* RISK ROW */
+#hl-risk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #222428;
+}
+
+#hl-risk-row label {
+  font-size: 12px; color: #aaa;
+  letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
+}
+.hl-rr-label { color: #6fb3ff !important; }
+
+#hl-risk-input, #hl-rr-input {
+  flex: 1; min-width: 56px; background: #1c1e22;
+  border: 1px solid #333840; border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 19px; font-weight: 700; padding: 7px 8px;
+  text-align: center; outline: none;
+  transition: border-color 0.15s;
+}
+#hl-risk-input { color: #f0c040; }
+#hl-rr-input   { color: #6fb3ff; }
+#hl-risk-input:focus { border-color: #f0c040; }
+#hl-rr-input:focus   { border-color: #6fb3ff; }
+
+.hl-rr-quick { display: flex; gap: 4px; }
+
+.hl-rrbtn {
+  background: #1c1e22; border: 1px solid #2e3035;
+  color: #ccc; font-family: 'Courier New', monospace;
+  font-size: 13px; font-weight: 700;
+  padding: 6px 10px; border-radius: 3px; cursor: pointer;
+  transition: all 0.12s;
+}
+.hl-rrbtn:hover { background: #252830; color: #6fb3ff; border-color: #6fb3ff; }
+
+/* SECTION LABELS */
+#hl-section-headers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.hl-section-label {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 0;
+  border-radius: 3px;
+}
+.buy-label  { color: #4cd97e; background: #0c1810; border: 1px solid #1a3a22; }
+.sell-label { color: #f06060; background: #180c0c; border: 1px solid #3a1a1a; }
+
+/* ROWS */
+.hl-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.hl-row-divider {
+  height: 1px;
+  background: linear-gradient(to right, #1a3a22, #2a2a2a, #3a1a1a);
+  margin: 8px 0;
+}
+
+/* SLOT CARD */
+.hl-col {
+  border-radius: 5px;
+  padding: 9px 8px;
+  border: 1px solid;
+}
+.hl-col-buy  { background: #0c1810; border-color: #1e4028; }
+.hl-col-sell { background: #180c0c; border-color: #401e1e; }
+
+.hl-col-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 8px; text-align: center;
+}
+.hl-col-buy  .hl-col-title { color: #4cd97e; }
+.hl-col-sell .hl-col-title { color: #f06060; }
+
+.hl-field { margin-bottom: 7px; }
+
+.hl-field label {
+  display: block; font-size: 10px; color: #999;
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 3px; font-weight: 600;
+}
+
+.hl-input-wrap { display: flex; gap: 3px; align-items: center; }
+
+.hl-field input[type="text"] {
+  flex: 1; background: #16181c;
+  border: 1px solid #2a2e35; border-radius: 3px;
+  color: #f2f2f2; font-family: 'Courier New', monospace;
+  font-size: 16px; font-weight: 600;
+  padding: 6px 7px; outline: none;
+  transition: border-color 0.12s; min-width: 0;
+}
+.hl-col-buy  .hl-field input[type="text"]:focus { border-color: #4cd97e; }
+.hl-col-sell .hl-field input[type="text"]:focus { border-color: #f06060; }
+
+.hl-copy-btn {
+  background: #1e2228; border: 1px solid #2e3540;
+  color: #bbb; font-family: 'Courier New', monospace;
+  font-size: 10px; padding: 5px 7px;
+  border-radius: 3px; cursor: pointer;
+  white-space: nowrap; transition: all 0.12s; font-weight: 600;
+}
+.hl-copy-btn:hover  { color: #f0c040; border-color: #f0c040; }
+.hl-copy-btn.copied { color: #4cd97e; border-color: #4cd97e; }
+
+/* SIZE RESULT */
+.hl-size-result {
+  padding: 7px 8px; border-radius: 3px;
+  text-align: center; margin-bottom: 6px;
+}
+.hl-col-buy  .hl-size-result { background: #0d2016; border: 1px solid #1a3a22; }
+.hl-col-sell .hl-size-result { background: #200d0d; border: 1px solid #3a1a1a; }
+
+.hl-size-label {
+  font-size: 9px; color: #888;
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 2px; font-weight: 600;
+}
+.hl-size-value { font-size: 19px; font-weight: 700; }
+.hl-col-buy  .hl-size-value { color: #4cd97e; }
+.hl-col-sell .hl-size-value { color: #f06060; }
+.hl-size-unit { font-size: 10px; color: #666; margin-left: 2px; }
+
+/* TAKE PROFIT RESULT (dari RR) */
+.hl-tp-result {
+  padding: 7px 8px; border-radius: 3px;
+  text-align: center; margin-bottom: 7px;
+  background: #0c1622; border: 1px solid #1c3350;
+}
+.hl-tp-result .hl-input-wrap { justify-content: center; }
+.hl-tp-value { font-size: 17px; font-weight: 700; color: #6fb3ff; }
+.hl-tp-rr {
+  color: #6fb3ff; background: #14233a;
+  border: 1px solid #1c3350; border-radius: 3px;
+  padding: 1px 5px; font-size: 9px; margin-left: 3px;
+}
+
+/* FILL BUTTONS: "Full" & "50%" langsung mengisi order */
+.hl-fill-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.hl-fill-btn {
+  width: 100%;
+  padding: 13px 0;
+  border-radius: 5px;
+  border: none;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.hl-col-buy-fill {
+  background: #1a5230;
+  color: #7fffa8;
+  border: 1px solid #30804a;
+  box-shadow: 0 2px 8px rgba(50,180,90,0.18);
+}
+.hl-col-buy-fill:hover:not(:disabled) {
+  background: #226640;
+  color: #afffcc;
+  box-shadow: 0 4px 14px rgba(50,200,100,0.3);
+}
+
+.hl-col-sell-fill {
+  background: #521a1a;
+  color: #ffaaaa;
+  border: 1px solid #803030;
+  box-shadow: 0 2px 8px rgba(180,50,50,0.18);
+}
+.hl-col-sell-fill:hover:not(:disabled) {
+  background: #662222;
+  color: #ffcccc;
+  box-shadow: 0 4px 14px rgba(200,60,60,0.3);
+}
+
+.hl-fill-btn:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* STATUS BAR */
+#hl-status-bar {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #16181c;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+  letter-spacing: 0.5px;
+  min-height: 30px;
+  border: 1px solid #222428;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#hl-status-bar.ok   { color: #4cd97e; }
+#hl-status-bar.err  { color: #f06060; }
+#hl-status-bar.warn { color: #f0c040; }
+
+/* MINIMIZED */
+#hl-widget-panel.minimized #hl-widget-body { display: none; }
+
+/* DRAG */
+#hl-widget-panel.dragging { opacity: 0.9; box-shadow: 0 20px 60px rgba(0,0,0,0.9); }
