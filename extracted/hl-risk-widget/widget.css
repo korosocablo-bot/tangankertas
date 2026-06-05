@@ -218,37 +218,25 @@
   padding: 1px 5px; font-size: 9px; margin-left: 3px;
 }
 
-/* TOGGLE UKURAN FILL: FULL / 50% */
-.hl-pct-toggle {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 4px; margin-bottom: 6px;
-}
-.hl-pctbtn {
-  background: #1c1e22; border: 1px solid #2e3035;
-  color: #999; font-family: 'Courier New', monospace;
-  font-size: 11px; font-weight: 700; letter-spacing: 1px;
-  padding: 6px 0; border-radius: 3px; cursor: pointer;
-  text-transform: uppercase; transition: all 0.12s;
-}
-.hl-pctbtn:hover { color: #fff; border-color: #555; }
-.hl-col-buy  .hl-pctbtn.active { background: #16351f; color: #7fffa8; border-color: #30804a; }
-.hl-col-sell .hl-pctbtn.active { background: #351616; color: #ffaaaa; border-color: #803030; }
-
-/* AUTOFILL BUTTONS */
-.hl-autofill-btn {
-  width: 100%;
+/* FILL BUTTONS: "Full" & "50%" langsung mengisi order */
+.hl-fill-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
   margin-top: 4px;
-  padding: 12px 0;
-  border-radius: 4px;
+}
+
+.hl-fill-btn {
+  width: 100%;
+  padding: 13px 0;
+  border-radius: 5px;
   border: none;
   font-family: 'Courier New', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.15s;
-  display: block;
   line-height: 1;
 }
 
@@ -276,7 +264,7 @@
   box-shadow: 0 4px 14px rgba(200,60,60,0.3);
 }
 
-.hl-autofill-btn:disabled {
+.hl-fill-btn:disabled {
   opacity: 0.28;
   cursor: not-allowed;
   box-shadow: none;

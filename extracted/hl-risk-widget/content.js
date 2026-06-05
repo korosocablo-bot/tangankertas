@@ -1,4 +1,4 @@
-// HL Risk Calculator v1.5 — 4 slots (2 long, 2 short) + autosave + autofill
+// HL Risk Calculator v1.6 — 4 slots (2 long, 2 short) + autosave + autofill
 // Autofill di-hardening: polling waitFor (bukan delay tetap), finder elemen
 // berbasis skor multi-strategi, setter nilai dengan verifikasi + fallback ketik,
 // dan konfigurasi selektor terpusat (HL_SELECTORS) agar tahan perubahan DOM.
@@ -10,6 +10,8 @@
 // v1.5: fitur Risk-Reward (default 1:3, ganti tombol 5/10/20/50) + harga Take
 // Profit otomatis per slot & autofill TP; opsi ukuran fill FULL/50% per slot;
 // font diperbesar (panel 540px).
+// v1.6: dua tombol fill langsung "Full" / "50%" (tanpa pilih dulu lalu klik FILL
+// lagi); teks ringkas & font tombol diperbesar.
 (function () {
   if (document.getElementById('hl-risk-widget')) return;
 
@@ -21,16 +23,15 @@
     risk: 10,
     rr: 3,                 // default Risk-Reward 1:3
     slots: {
-      buy1:  { price: '', sl: '', pct: 100 },
-      buy2:  { price: '', sl: '', pct: 100 },
-      sell1: { price: '', sl: '', pct: 100 },
-      sell2: { price: '', sl: '', pct: 100 },
+      buy1:  { price: '', sl: '' },
+      buy2:  { price: '', sl: '' },
+      sell1: { price: '', sl: '' },
+      sell2: { price: '', sl: '' },
     }
   };
 
-  // Default aman untuk state lama yang tersimpan (tanpa rr / pct).
+  // Default aman untuk state lama yang tersimpan (tanpa rr).
   function getRR()    { const v = parseFloat(state.rr); return (v && v > 0) ? v : 3; }
-  function getPct(id) { const p = state.slots[id] && parseFloat(state.slots[id].pct); return (p === 50) ? 50 : 100; }
 
   // ── STORAGE ──
   function loadState(cb) {
@@ -68,12 +69,10 @@
 
   // ── HTML BUILDER ──
   function slotHTML(id) {
-    const s = state.slots[id] || { price: '', sl: '', pct: 100 };
+    const s = state.slots[id] || { price: '', sl: '' };
     const isBuy  = slotSide(id) === 'buy';
     const colCls = isBuy ? 'hl-col-buy' : 'hl-col-sell';
     const arrow  = isBuy ? '▲' : '▼';
-    const fillLabel = isBuy ? `▲ FILL ${slotLabel(id)}` : `▼ FILL ${slotLabel(id)}`;
-    const pct = getPct(id);
 
     return `
       <div class="hl-col ${colCls}" data-slot="${id}">
@@ -111,14 +110,10 @@
           </div>
         </div>
 
-        <div class="hl-pct-toggle">
-          <button class="hl-pctbtn ${pct === 100 ? 'active' : ''}" data-slot="${id}" data-pct="100">FULL</button>
-          <button class="hl-pctbtn ${pct === 50  ? 'active' : ''}" data-slot="${id}" data-pct="50">50%</button>
+        <div class="hl-fill-row">
+          <button class="hl-fill-btn ${colCls}-fill" data-slot="${id}" data-pct="100">${arrow} Full</button>
+          <button class="hl-fill-btn ${colCls}-fill" data-slot="${id}" data-pct="50">${arrow} 50%</button>
         </div>
-
-        <button class="hl-autofill-btn ${colCls}-fill" id="btn-autofill-${id}">
-          ${fillLabel}
-        </button>
       </div>
     `;
   }
@@ -253,9 +248,7 @@
 
   function updateAutofillButtons() {
     const onHL = isHyperliquid();
-    SLOTS.forEach(id => {
-      const btn = document.getElementById(`btn-autofill-${id}`);
-      if (!btn) return;
+    document.querySelectorAll('#hl-risk-widget .hl-fill-btn').forEach(btn => {
       btn.disabled = !onHL;
       btn.title = onHL ? '' : 'Hanya berfungsi di app.hyperliquid.xyz';
     });
@@ -573,14 +566,14 @@
   }
   try { window.__hlRiskDiag = hlDiag; } catch (_) {}
 
-  async function autofillHL(slotId) {
+  async function autofillHL(slotId, pct) {
     if (autofillBusy) return;            // cegah klik ganda / re-entrancy
     const slot  = state.slots[slotId];
     const side  = slotSide(slotId);
     const price = cleanNum(slot.price);
     const sl    = cleanNum(slot.sl);
     const rr    = getRR();
-    const pct   = getPct(slotId);
+    pct = (pct === 50) ? 50 : 100;       // fraksi ukuran fill (Full / 50%)
     const risk  = parseFloat(document.getElementById('hl-risk-input').value) || 0;
     const fullSize = calcSize(risk, price, sl);
     const size  = (fullSize != null) ? fullSize * (pct / 100) : null;
@@ -734,18 +727,12 @@
       });
     });
 
-    // Toggle ukuran fill: FULL (100%) / 50%
-    wrapper.querySelectorAll('.hl-pctbtn').forEach(btn => {
+    // Fill langsung: tombol "Full" (100%) atau "50%" tanpa langkah pilih dulu
+    wrapper.querySelectorAll('.hl-fill-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const id  = btn.getAttribute('data-slot');
         const pct = parseFloat(btn.getAttribute('data-pct'));
-        if (!state.slots[id]) return;
-        state.slots[id].pct = pct;
-        // perbarui status aktif kedua tombol di slot ini
-        wrapper.querySelectorAll(`.hl-pctbtn[data-slot="${id}"]`).forEach(b => {
-          b.classList.toggle('active', parseFloat(b.getAttribute('data-pct')) === pct);
-        });
-        saveState();
+        autofillHL(id, pct);
       });
     });
 
@@ -762,12 +749,6 @@
         const copyVal = isNaN(n) ? String(raw).trim() : (isSL ? String(roundToInt(n)) : String(n));
         doCopy(copyVal, btn);
       });
-    });
-
-    // Autofill buttons
-    SLOTS.forEach(id => {
-      const btn = document.getElementById(`btn-autofill-${id}`);
-      if (btn) btn.addEventListener('click', () => autofillHL(id));
     });
 
     // Minimize

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HL Risk Calculator",
-  "version": "1.5",
+  "version": "1.6",
   "description": "Position size & risk calculator for Hyperliquid + TradingView",
   "permissions": ["storage"],
   "host_permissions": [
