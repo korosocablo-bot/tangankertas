@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0B2A1E" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="720" fill="#FFFFFF"/>
+  <!-- aksen tepi kiri -->
+  <rect x="0" y="0" width="8" height="720" fill="#0B7A4B"/>
+
+  <!-- HEADER -->
+  <rect x="56" y="58" width="13" height="13" rx="2" fill="#0B7A4B"/>
+  <text x="78" y="69" font-family="Noto Sans" font-size="12.5" font-weight="700" letter-spacing="3" fill="#0B7A4B">RUANG LINGKUP PEKERJAAN</text>
+  <text x="56" y="118" font-family="Noto Sans" font-size="40" font-weight="800" letter-spacing="0.3" fill="#13262E">Pemeliharaan Fasilitas</text>
+  <text x="56" y="150" font-family="Noto Sans" font-size="16" font-weight="500" fill="#6A7B82">Sebaran lokasi pekerjaan pemeliharaan fasilitas lintas anak perusahaan</text>
+  <text x="1224" y="92" text-anchor="end" font-family="Noto Sans" font-size="58" font-weight="800" fill="#E4F1EA">05</text>
+  <text x="1224" y="118" text-anchor="end" font-family="Noto Sans" font-size="12" font-weight="700" letter-spacing="2" fill="#6A7B82">LOKASI</text>
+  <line x1="56" y1="170" x2="1224" y2="170" stroke="#E2E8E5" stroke-width="1.5"/>
+
+  <!-- KARTU -->
+  
+    <g>
+      <rect x="56" y="196" width="216" height="366" rx="12" fill="#FFFFFF" stroke="#E4EAE7" stroke-width="1.4" filter="url(#cardShadow)"/>
+      <!-- aksen atas -->
+      <rect x="56" y="196" width="216" height="5" rx="2.5" fill="#0B7A4B"/>
+      <!-- angka samar -->
+      <text x="254" y="258" text-anchor="end" font-family="Noto Sans" font-size="54" font-weight="800" fill="#E4F1EA">01</text>
+      <!-- ikon -->
+      <circle cx="98" cy="242" r="25" fill="#E9F4EE"/>
+      <g transform="translate(86, 230)">
+        <circle cx="12" cy="4.6" r="2.1" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="12" y1="6.7" x2="12" y2="20" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="8.4" y1="9.2" x2="15.6" y2="9.2" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 13.2 C5 18 8.2 20.2 12 20.2 C15.8 20.2 19 18 19 13.2" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="5" y1="13.2" x2="3.2" y2="13.2" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="19" y1="13.2" x2="20.8" y2="13.2" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <!-- prefix -->
+      <text x="80" y="300" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">PEMELIHARAAN</text><text x="80" y="315" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">FASILITAS</text>
+      <!-- kode PT -->
+      <text x="80" y="346" font-family="Noto Sans" font-size="23" font-weight="800" letter-spacing="0.5" fill="#0B7A4B">PT PSL</text>
+      <!-- area -->
+      <text x="80" y="392" font-family="Noto Sans" font-size="20" font-weight="700" fill="#13262E">Area Kalibaru</text>
+      <!-- garis aksen bawah -->
+      <rect x="80" y="522" width="34" height="3.5" rx="1.75" fill="#0B7A4B"/>
+    </g>
+    <g>
+      <rect x="294" y="196" width="216" height="366" rx="12" fill="#FFFFFF" stroke="#E4EAE7" stroke-width="1.4" filter="url(#cardShadow)"/>
+      <!-- aksen atas -->
+      <rect x="294" y="196" width="216" height="5" rx="2.5" fill="#0B7A4B"/>
+      <!-- angka samar -->
+      <text x="492" y="258" text-anchor="end" font-family="Noto Sans" font-size="54" font-weight="800" fill="#E4F1EA">02</text>
+      <!-- ikon -->
+      <circle cx="336" cy="242" r="25" fill="#E9F4EE"/>
+      <g transform="translate(324, 230)">
+        <rect x="3.6" y="4.4" width="7.2" height="7.2" rx="1.1" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13.2" y="4.4" width="7.2" height="7.2" rx="1.1" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="3.6" y="13.2" width="7.2" height="7.2" rx="1.1" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13.2" y="13.2" width="7.2" height="7.2" rx="1.1" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <!-- prefix -->
+      <text x="318" y="300" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">PEMELIHARAAN</text><text x="318" y="315" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">FASILTAS</text>
+      <!-- kode PT -->
+      <text x="318" y="346" font-family="Noto Sans" font-size="23" font-weight="800" letter-spacing="0.5" fill="#0B7A4B">PT MTI</text>
+      <!-- area -->
+      <text x="318" y="392" font-family="Noto Sans" font-size="20" font-weight="700" fill="#13262E">Lapangan</text>
+      <!-- garis aksen bawah -->
+      <rect x="318" y="522" width="34" height="3.5" rx="1.75" fill="#0B7A4B"/>
+    </g>
+    <g>
+      <rect x="532" y="196" width="216" height="366" rx="12" fill="#FFFFFF" stroke="#E4EAE7" stroke-width="1.4" filter="url(#cardShadow)"/>
+      <!-- aksen atas -->
+      <rect x="532" y="196" width="216" height="5" rx="2.5" fill="#0B7A4B"/>
+      <!-- angka samar -->
+      <text x="730" y="258" text-anchor="end" font-family="Noto Sans" font-size="54" font-weight="800" fill="#E4F1EA">03</text>
+      <!-- ikon -->
+      <circle cx="574" cy="242" r="25" fill="#E9F4EE"/>
+      <g transform="translate(562, 230)">
+        <path d="M3.6 20.4 V11 L12 6 L20.4 11 V20.4 Z" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="9.4" y="13.6" width="5.2" height="6.8" rx="0.6" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="3.6" y1="20.4" x2="20.4" y2="20.4" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <!-- prefix -->
+      <text x="556" y="300" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">PEMELIHARAAN</text><text x="556" y="315" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">FASILTAS</text>
+      <!-- kode PT -->
+      <text x="556" y="346" font-family="Noto Sans" font-size="23" font-weight="800" letter-spacing="0.5" fill="#0B7A4B">PT MTI</text>
+      <!-- area -->
+      <text x="556" y="392" font-family="Noto Sans" font-size="20" font-weight="700" fill="#13262E">Gudang</text>
+      <!-- garis aksen bawah -->
+      <rect x="556" y="522" width="34" height="3.5" rx="1.75" fill="#0B7A4B"/>
+    </g>
+    <g>
+      <rect x="770" y="196" width="216" height="366" rx="12" fill="#FFFFFF" stroke="#E4EAE7" stroke-width="1.4" filter="url(#cardShadow)"/>
+      <!-- aksen atas -->
+      <rect x="770" y="196" width="216" height="5" rx="2.5" fill="#0B7A4B"/>
+      <!-- angka samar -->
+      <text x="968" y="258" text-anchor="end" font-family="Noto Sans" font-size="54" font-weight="800" fill="#E4F1EA">04</text>
+      <!-- ikon -->
+      <circle cx="812" cy="242" r="25" fill="#E9F4EE"/>
+      <g transform="translate(800, 230)">
+        <rect x="6.8" y="3.4" width="10.4" height="17" rx="1.2" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="9.4" y1="7" x2="11" y2="7" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="13" y1="7" x2="14.6" y2="7" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="9.4" y1="10.4" x2="11" y2="10.4" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="13" y1="10.4" x2="14.6" y2="10.4" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="9.4" y1="13.8" x2="11" y2="13.8" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="13" y1="13.8" x2="14.6" y2="13.8" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="10.8" y1="20.4" x2="13.2" y2="20.4" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <!-- prefix -->
+      <text x="794" y="300" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">PEMELIHARAAN</text><text x="794" y="315" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">FASILITAS</text>
+      <!-- kode PT -->
+      <text x="794" y="346" font-family="Noto Sans" font-size="23" font-weight="800" letter-spacing="0.5" fill="#0B7A4B">PT MMI</text>
+      <!-- area -->
+      <text x="794" y="392" font-family="Noto Sans" font-size="20" font-weight="700" fill="#13262E">Pelindo Tower</text>
+      <!-- garis aksen bawah -->
+      <rect x="794" y="522" width="34" height="3.5" rx="1.75" fill="#0B7A4B"/>
+    </g>
+    <g>
+      <rect x="1008" y="196" width="216" height="366" rx="12" fill="#FFFFFF" stroke="#E4EAE7" stroke-width="1.4" filter="url(#cardShadow)"/>
+      <!-- aksen atas -->
+      <rect x="1008" y="196" width="216" height="5" rx="2.5" fill="#0B7A4B"/>
+      <!-- angka samar -->
+      <text x="1206" y="258" text-anchor="end" font-family="Noto Sans" font-size="54" font-weight="800" fill="#E4F1EA">05</text>
+      <!-- ikon -->
+      <circle cx="1050" cy="242" r="25" fill="#E9F4EE"/>
+      <g transform="translate(1038, 230)">
+        <path d="M8.6 20.8 L10.8 4.2" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15.4 20.8 L13.2 4.2" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="12" y1="6" x2="12" y2="9" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="12" y1="12" x2="12" y2="15" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="12" y1="18" x2="12" y2="20" fill="none" stroke="#0B7A4B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <!-- prefix -->
+      <text x="1032" y="300" font-family="Noto Sans" font-size="10.5" font-weight="600" letter-spacing="1.2" fill="#6A7B82">PEMELIHARAAN</text>
+      <!-- kode PT -->
+      <text x="1032" y="346" font-family="Noto Sans" font-size="23" font-weight="800" letter-spacing="0.5" fill="#0B7A4B">PT CTP</text>
+      <!-- area -->
+      <text x="1032" y="392" font-family="Noto Sans" font-size="20" font-weight="700" fill="#13262E">Jalan Tol</text><text x="1032" y="417" font-family="Noto Sans" font-size="20" font-weight="700" fill="#13262E">JTCC</text>
+      <!-- garis aksen bawah -->
+      <rect x="1032" y="522" width="34" height="3.5" rx="1.75" fill="#0B7A4B"/>
+    </g>
+
+  <!-- FOOTER -->
+  <line x1="56" y1="616" x2="1224" y2="616" stroke="#E2E8E5" stroke-width="1.5"/>
+  <text x="56" y="646" font-family="Noto Sans" font-size="12.5" font-weight="600" letter-spacing="0.5" fill="#6A7B82">Pemeliharaan Fasilitas — Ringkasan Lokasi Pekerjaan</text>
+  <circle cx="1138" cy="641" r="4" fill="#0B7A4B"/>
+  <text x="1224" y="646" text-anchor="end" font-family="Noto Sans" font-size="12.5" font-weight="700" letter-spacing="1.5" fill="#13262E">RAHASIA &amp; INTERNAL</text>
+</svg>
